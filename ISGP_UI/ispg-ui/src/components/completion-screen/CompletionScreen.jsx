@@ -1,9 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, useTheme } from '@mui/material';
 
 const CompletionScreen = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
 
   return (
     <Box
@@ -12,11 +13,11 @@ const CompletionScreen = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        height: '90vh',
+        height: '70vh',
         textAlign: 'center',
-        //backgroundColor: '#f4f6f8',
         position: 'relative',
         overflow: 'hidden',
+       // bgcolor: theme.palette.background.default, // Use theme background color
       }}
     >
       {/* Background */}
@@ -35,26 +36,22 @@ const CompletionScreen = () => {
       />
 
       {/* Content */}
-      <Typography variant="h1" sx={{ fontSize: '3rem', mb: 2, color: '#1976d2' }}>
-      Evolution Completeed
+      <Typography variant="h1" sx={{ mb: 2, color: theme.palette.primary.main }}>
+        Evolution Completed
       </Typography>
-      <Typography variant="body1" sx={{ fontSize: '1.25rem', mb: 4, color: '#1976d2' }}>
-       The algorithm has finished running successfully.
+      <Typography variant="body1" sx={{ mb: 4 }}>
+        The algorithm has finished running successfully.
       </Typography>
 
       {/* Buttons */}
-      <Box sx={{ display: 'flex', gap: 2 }}>
+      <Box sx={{ display: 'flex', gap: theme.spacing(2) }}>
         <Button
           variant="contained"
-          sx={{
-            backgroundColor: '#1976d2',
-            '&:hover': { backgroundColor: '#115293' },
-          }}
+          color="primary"
           onClick={() => navigate('/')}
         >
           Return to Home
         </Button>
-       
       </Box>
     </Box>
   );

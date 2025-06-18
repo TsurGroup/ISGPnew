@@ -1,7 +1,10 @@
+from config.env import get_env
 from data_base.algorithm_parameters import get_algorithm_parameters_from_db
 from data_base.experiment_data import get_experiment_data_db
 from data_base.genomes import get_discrepencies_from_db
-from modules.experiment_data_module.constant_data import calculate_constant_data, calculate_filter, calculate_time_intervals
+from modules.experiment_data_module.constant_data import calculate_constant_data
+from tests.test_data import dummy_experiment_data, dummy_algorithm_parameters
+
 
 from models.experiment_data import ExperimentData
 from models.project import AlgorithmParameters
@@ -31,30 +34,11 @@ def get_project_constants_from_cache() -> ProjectConstants:
       if PROJECTS_CONSTANTS not in cache:  
          expermint_data1  = get_experiment_data(0)
          expermint_data2  = get_experiment_data(1)
-         
-         project_constants = calculate_constant_data(expermint_data1,expermint_data2) 
          algorithm_parameters = get_algorithm_parameters_from_cache()
-
-         project_constants = calculate_filter(True,algorithm_parameters.w0,algorithm_parameters.w1,expermint_data1,project_constants)
-         project_constants = calculate_time_intervals(expermint_data1,project_constants,algorithm_parameters.point_diff)
-
+         project_constants = calculate_constant_data(expermint_data1,expermint_data2,algorithm_parameters) 
          set_project_constants(project_constants)
 
       return cache.get(PROJECTS_CONSTANTS)
-
-def update_project_constants_from_cache() -> ProjectConstants:
-         
-         project_constants = get_project_constants_from_cache()
-         expermint_data1  = get_experiment_data(0)
-         
-         algorithm_parameters = get_algorithm_parameters_from_cache()
-
-         project_constants = calculate_filter(True,algorithm_parameters.w0,algorithm_parameters.w1,expermint_data1,project_constants)
-         project_constants = calculate_time_intervals(expermint_data1,project_constants,algorithm_parameters.point_diff) 
-
-         set_project_constants(project_constants)
-
-         return cache.get(PROJECTS_CONSTANTS)
 
 
 def set_project_constants(project_constants:ProjectConstants):       
@@ -68,12 +52,14 @@ def delete_project_constants_cache() -> None:
 
 
 def get_experiment_data(id) -> ExperimentData:
-    #print(cache)
-    key = EXPERIMENT_DATA+str(id)
+    if get_env() == "test":
+        return dummy_experiment_data
 
-    if key not in cache: 
+    key = EXPERIMENT_DATA + str(id)
+
+    if key not in cache:
         set_experiment_data(id)
-        
+
     return cache.get(key)
 
 def set_experiment_data(id):
@@ -84,29 +70,27 @@ def set_experiment_data(id):
 
 
 def get_algorithm_parameters_from_cache() -> AlgorithmParameters:
-    if ALGORITHM_PARAMETERS not in cache:   
-       algorithm_parameters = set_algorithm_parameters_cache()
-       return algorithm_parameters
+    if get_env() == "test":
+        # Return dummy AlgorithmParameters for testing
+        return dummy_algorithm_parameters
+
+    if ALGORITHM_PARAMETERS not in cache:
+        algorithm_parameters = get_algorithm_parameters_from_db()
+        set_algorithm_parameters_cache(algorithm_parameters)
 
     return cache[ALGORITHM_PARAMETERS]
 
-def set_algorithm_parameters_cache():
-
-    algorithm_parameters = get_algorithm_parameters_from_db()   
-
+def set_algorithm_parameters_cache(algorithm_parameters:AlgorithmParameters):
     if algorithm_parameters is None:
         return None
     cache[ALGORITHM_PARAMETERS] = algorithm_parameters
-    return algorithm_parameters
+
 
 
 def get_discrepancies(run:int,generation:int):
-     key = DISCREPANCIES+str(run)+str(generation)
-     if key not in cache:  
-        discrepencies = get_discrepencies_from_db(run,generation)
-        #print(discrepencies)
-        cache[key] =  discrepencies
-     return cache.get(key)
+
+    discrepencies = get_discrepencies_from_db(run,generation)
+    return discrepencies
 
 
 

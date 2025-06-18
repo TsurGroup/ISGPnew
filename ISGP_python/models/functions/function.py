@@ -25,6 +25,7 @@ class FunctionType(IntEnum):
     NegativeGaussian = (16, "Negative Gaussian","Negative")
     NegativeLorentzian = (17, "Negative Lorentzian","Negative")
     NegativeHyperbolicSecant = (18, "Negative Hyperbolic Secant","Negative")
+    NewForTest = (19, "NewForTest","Negative")
     
     
     def __new__(cls, value, description, category):
@@ -85,7 +86,6 @@ class Function(BaseModel):
 
     @classmethod
     def from_dict(cls, data):
-        print(data)
         # Create an instance based on the function type
         func_type = FunctionType(data["func_type"])  # Convert the value back to FunctionType
         if func_type == FunctionType.PseudoDelta:
@@ -94,7 +94,37 @@ class Function(BaseModel):
         elif func_type == FunctionType.Gaussian:
             from models.functions.gaussian import Gaussian  # Import subclass dynamically
             return Gaussian.from_dict(data)
-        # Add other types as needed
+        elif func_type == FunctionType.Lorentzian:
+            from models.functions.lorentzian import Lorentzian  # Import subclass dynamically
+            return Lorentzian.from_dict(data)
+        elif func_type == FunctionType.HyperbolicSecant:
+            from models.functions.hyperbolic_secant import HyperbolicSecant  # Import subclass dynamically
+            return HyperbolicSecant.from_dict(data)
+        elif func_type == FunctionType.ColeCole:
+            from models.functions.cole_cole import ColeCole  # Import subclass dynamically
+            return ColeCole.from_dict(data)
+        elif func_type == FunctionType.KirkwoodFuoss:
+            from models.functions.kirkwood_fuoss import KirkwoodFuoss  # Import subclass dynamically
+            return KirkwoodFuoss.from_dict(data)
+        elif func_type == FunctionType.PearsonVII:
+            from models.functions.pearson_vii import PearsonVII  # Import subclass dynamically
+            return PearsonVII.from_dict(data)
+        elif func_type == FunctionType.Losev:
+            from models.functions.losev import Losev  # Import subclass dynamically
+            return Losev.from_dict(data)
+        elif func_type == FunctionType.PseudoVoigt:
+            from models.functions.pseudo_voigt import PseudoVoigt  # Import subclass dynamically
+            return PseudoVoigt.from_dict(data)
+        elif func_type == FunctionType.AsymmetricGaussian:
+            from models.functions.asymmetric_gaussian import AsymmetricGaussian  # Import subclass dynamically
+            return AsymmetricGaussian.from_dict(data)
+        elif func_type == FunctionType.AsymmetricLorentzian:
+            from models.functions.asymmetric_lorentzian import AsymmetricLorentzian  # Import subclass dynamically
+            return AsymmetricLorentzian.from_dict(data)
+        elif func_type == FunctionType.AsymmetricHyperbolicSecant:
+            from models.functions.asymmetric_hyperbolic_secant import AsymmetricHyperbolicSecant  # Import subclass dynamically
+            return AsymmetricHyperbolicSecant.from_dict(data)
+       
         else:
             raise ValueError(f"Unknown function type: {func_type}")
 

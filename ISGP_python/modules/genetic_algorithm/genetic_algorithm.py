@@ -1,26 +1,22 @@
-#from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 import numpy as np
 from data_base.genomes import save_genomes
 from models.project import AlgorithmParameters
 from modules.output.excel_handler import save_metadata, save_run_to_excel
 from cache.cache import add_discrepancies, delete_discrepancies, get_algorithm_parameters_from_cache, get_experiment_data, get_project_constants_from_cache, get_project_status, set_project_status
-#from cache.sql_lite_cache import get_experiment_data, save_genomes
 
 from decorators.timer_decorator import timer_func
-# from evolution_status_context import get_abort_flag, get_evolution_running
+
 from mappers.dashboard_mapper import get_dashboard_view, get_empty_dashboard_view
 from models.experiment_data import ExperimentData
 from models.genome import Genome
 from models.project_data import ProjectConstants, ProjectStatus
 
-
 from modules.genetic_algorithm.fitness import fitness
-from modules.genetic_algorithm.genome_parameters import   new_function,get_genome_parameters_by_function,get_genome_parameters_new
+from modules.genetic_algorithm.genome_parameters import new_function,get_genome_parameters
 from models.functions.function import  FunctionType
 
-from user_context import current_user_id
-from multiprocessing import Pool, Manager
+from multiprocessing import Pool
 
 def generate_genome(experiment_data: ExperimentData,algorithm_parameters:AlgorithmParameters,project_constants:ProjectConstants,functions_num):
 
@@ -30,11 +26,10 @@ def generate_genome(experiment_data: ExperimentData,algorithm_parameters:Algorit
          function = new_function(FunctionType(random_number),project_constants.parameters)
          genome.add_function(function)
 
-    genome = get_genome_parameters_by_function(genome,experiment_data,algorithm_parameters,project_constants)
+    genome = get_genome_parameters(genome,experiment_data,algorithm_parameters,project_constants)
     #genome.fitness = fitness(genome, user_id)#need fix
     genome.fitness = fitness(genome,experiment_data,algorithm_parameters,project_constants)
     return genome
-
 
 #@timer_func
 def generate_genome_new(experiment_data: ExperimentData,algorithm_parameters:AlgorithmParameters,project_constants:ProjectConstants, function_type):
@@ -45,28 +40,12 @@ def generate_genome_new(experiment_data: ExperimentData,algorithm_parameters:Alg
     function = new_function(FunctionType(function_type), project_constants.parameters)  # Create a new function based on the FunctionType and parameters
     genome.add_function(function)  # Add the function to the genome
 
-    genome = get_genome_parameters_by_function(genome,experiment_data,algorithm_parameters,project_constants)
+    genome = get_genome_parameters(genome,experiment_data,algorithm_parameters,project_constants)
     genome.fitness = fitness(genome,experiment_data,algorithm_parameters,project_constants)
     #genome.fitness = fitness(genome, user_id)#need fix
 
     return genome
-#@timer_func
-#@profile
-# def generate_genome_pool(experiment_data: ExperimentData,project_constants:ProjectConstants):
-#   genome_pool :list[Genome] = []
-#   algorithm_parameters = get_algorithm_parameters_from_cache()
 
-#   with ThreadPoolExecutor() as executor:
-#         # Create futures for each task
-#         futures = [executor.submit(generate_genome_new, experiment_data,algorithm_parameters, project_constants, value) for value in algorithm_parameters.initial_functions]
-#         # As each future completes, add its result to the genome pool
-#         for future in as_completed(futures):
-#             genome_pool.append(future.result())
-#   return genome_pool
-
-def generate_genome_wrapper(value, experiment_data, algorithm_parameters, project_constants):
-    # This function is now globally accessible
-    return generate_genome_new(experiment_data, algorithm_parameters, project_constants, value)
 
 def generate_genome_pool(experiment_data: ExperimentData, project_constants: ProjectConstants) -> list[Genome]:
     genome_pool: list[Genome] = []
@@ -75,7 +54,7 @@ def generate_genome_pool(experiment_data: ExperimentData, project_constants: Pro
     # Use multiprocessing.Pool for parallel execution
     with Pool() as pool:
         # Map the initial functions to the generate_genome_new calls
-        results = pool.starmap(generate_genome_wrapper, [(value, experiment_data, algorithm_parameters, project_constants) for value in algorithm_parameters.initial_functions])
+        results = pool.starmap(generate_genome_new, [(experiment_data, algorithm_parameters, project_constants,value) for value in algorithm_parameters.initial_functions])
         
         # Collect the results in the genome pool
         genome_pool.extend(results)
@@ -92,9 +71,7 @@ def generate_population():
   algorithm_parameters = get_algorithm_parameters_from_cache()
   genome_pool = generate_genome_pool(experiment_data,project_constants)
 
-  #population = (np.random.choice(genome_pool, 20)).tolist()
- # print("algorithm_parameters.population_size")
-  #print(algorithm_parameters.population_size)
+
   population = (np.random.choice(genome_pool, algorithm_parameters.population_size)).tolist()
 
   #set_population(user_id,population)
@@ -138,7 +115,8 @@ def remove_function(genome:Genome, mutation_options,project_constants:ProjectCon
         new_genome.functions = genome.functions[:remove] + genome.functions[remove + 1:]
     return new_genome
 @timer_func
-def modify_genome(genome, genome_type_counter, algorithm_parameters: AlgorithmParameters, project_constants, experiment_data):
+#def modify_genome(genome, genome_type_counter, algorithm_parameters: AlgorithmParameters, project_constants, experiment_data): # duplication factor code
+def modify_genome(genome, algorithm_parameters: AlgorithmParameters, project_constants, experiment_data):
     new_genome = Genome()
     random = np.random.rand()
 
@@ -149,45 +127,51 @@ def modify_genome(genome, genome_type_counter, algorithm_parameters: AlgorithmPa
     else:
         new_genome = remove_function(genome, algorithm_parameters.mutation_functions, project_constants)
 
-    func_types_key = new_genome.get_func_types_key()
-    unique_key = tuple(sorted(func_types_key.items()))
+    #func_types_key = new_genome.get_func_types_key()# duplication factor code
+    #unique_key = tuple(sorted(func_types_key.items()))# duplication factor code
     # Create a local counter to return
-    local_counter = genome_type_counter.copy()
+    #local_counter = genome_type_counter.copy()# duplication factor code
 
-    if unique_key not in local_counter:
-        local_counter[unique_key] = 1
-    else:
-        local_counter[unique_key] += 1
+    #if unique_key not in local_counter:# duplication factor code
+    #    local_counter[unique_key] = 1# duplication factor code
+   # else:# duplication factor code
+    #    local_counter[unique_key] += 1# duplication factor code
 
     # Check if the count exceeds the limit
-    if local_counter[unique_key] > algorithm_parameters.duplication_factor:
-        return None, local_counter
+    #if local_counter[unique_key] > algorithm_parameters.duplication_factor:# duplication factor code
+      #  return None, local_counter# duplication factor code
 
-    new_genome = get_genome_parameters_by_function(new_genome, experiment_data, algorithm_parameters, project_constants)
+    new_genome = get_genome_parameters(new_genome, experiment_data, algorithm_parameters, project_constants)
     new_genome.fitness = fitness(new_genome, experiment_data, algorithm_parameters, project_constants)
 
-    return new_genome, local_counter
+    #return new_genome, local_counter # duplication factor code
+    return new_genome
 
 def modify_genome_wrapper(args):
-    (i, population, genome_type_counter, algorithm_parameters, project_constants, experiment_data) = args
-    new_genome, updated_counter = modify_genome(population[i], genome_type_counter, algorithm_parameters, project_constants, experiment_data)
-    return new_genome, updated_counter
+    #(i, population, genome_type_counter, algorithm_parameters, project_constants, experiment_data) = args  # duplication factor code
+    #new_genome, updated_counter = modify_genome(population[i], genome_type_counter, algorithm_parameters, project_constants, experiment_data) # duplication factor code
+    (i, population, algorithm_parameters, project_constants, experiment_data) = args
+    #new_genome, updated_counter = modify_genome(population[i], algorithm_parameters, project_constants, experiment_data) # duplication factor code
+    new_genome = modify_genome(population[i], algorithm_parameters, project_constants, experiment_data)
+   # return new_genome, updated_counter # duplication factor code
+    return new_genome
 
 
-def run_generation(population: list[Genome], genome_type_counter):
+#def run_generation(population: list[Genome], genome_type_counter): # duplication factor code
+def run_generation(population: list[Genome]):
     #print('pop len is')
     #print(len(population))
     
     algorithm_parameters = get_algorithm_parameters_from_cache()
     experiment_data = get_experiment_data(0)
     project_constants = get_project_constants_from_cache()
-    print(project_constants.parameters.to_dict())
     project_status = get_project_status()
 
     new_population: list[Genome] = []
     
     with Pool() as pool:
-        modify_genome_args = [(i, population, genome_type_counter, algorithm_parameters, project_constants, experiment_data) for i in range(1, len(population))]
+       # modify_genome_args = [(i, population, genome_type_counter, algorithm_parameters, project_constants, experiment_data) for i in range(1, len(population))] # duplication factor code
+        modify_genome_args = [(i, population, algorithm_parameters, project_constants, experiment_data) for i in range(1, len(population))]
         modify_genome_tasks = [pool.apply_async(modify_genome_wrapper, (args,)) for args in modify_genome_args]
         generate_genome_task = pool.apply_async(generate_genome, (experiment_data, algorithm_parameters, project_constants, algorithm_parameters.expected_peaks_num + 1))
 
@@ -197,17 +181,18 @@ def run_generation(population: list[Genome], genome_type_counter):
                 print("Evolution process aborted")
                 set_project_status(ProjectStatus.Finished)
                 return None
-            new_genome, updated_counter = task.get()
+            #new_genome, updated_counter = task.get()# duplication factor code
+            new_genome = task.get() 
             if new_genome is None:
                 continue
             new_population.append(new_genome)
 
             # Update the genome_type_counter with the results from the worker
-            for key, value in updated_counter.items():
-                if key in genome_type_counter:
-                    genome_type_counter[key] += value
-                else:
-                    genome_type_counter[key] = value
+            #for key, value in updated_counter.items(): # duplication factor code
+              #  if key in genome_type_counter: # duplication factor code
+               #     genome_type_counter[key] += value # duplication factor code
+              #  else: # duplication factor code
+               #     genome_type_counter[key] = value # duplication factor code
 
         if project_status != ProjectStatus.Aborted:
             last_genome = generate_genome_task.get()
@@ -225,21 +210,19 @@ def run_evolution():
     algorithm_parameters = get_algorithm_parameters_from_cache()
 
     for i in range(algorithm_parameters.runs_num):
-        genome_type_counter = {}
+        #genome_type_counter = {} # duplication factor code
         delete_discrepancies()
         population = generate_population()
-        #print('pop len is')
-        #print(len(population))
 
         #start_time = time.time()
-        for genome in population:
+       # for genome in population: # duplication factor code
     # Get the Counter of function types
-           func_types_key = genome.get_func_types_key()
-           unique_key = tuple(sorted(func_types_key.items()))
+           #func_types_key = genome.get_func_types_key() # duplication factor code
+          # unique_key = tuple(sorted(func_types_key.items())) # duplication factor code
 
-           if unique_key not in genome_type_counter:
-             genome_type_counter[unique_key] = 0
-           genome_type_counter[unique_key] += 1
+           #if unique_key not in genome_type_counter: # duplication factor code
+          #   genome_type_counter[unique_key] = 0 # duplication factor code
+          # genome_type_counter[unique_key] += 1 # duplication factor code
         #print("pop is:")
         #print(population)
         #end_time = time.time()
@@ -252,7 +235,8 @@ def run_evolution():
 
         for j in range(algorithm_parameters.max_generations):
 
-            population = run_generation(population,genome_type_counter)
+           #population = run_generation(population,genome_type_counter) # duplication factor code
+            population = run_generation(population) 
             if population is None:
                 return
             # print("genome_type_counter is:")
@@ -269,13 +253,9 @@ def run_evolution():
                 print(f"Run {i + 1}: No improvement for stop_criteria generations. Moving to the next run.")
                 break  # Exit the current run loop
 
-            #save_genomes(population, j)
+       
             
             save_genomes(i+1,j+1,population)
-
-            discrepancies = [{'discrepancy': genome.discrepancy, 'parameters_num': genome.get_parameters_num(), 'best_model': i == 0} for i, genome in enumerate(population)]
-
-            add_discrepancies(discrepancies,i+1,j+1)
             
             yield get_dashboard_view(i+1, j+1, population[0])
 

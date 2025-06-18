@@ -5,7 +5,7 @@ from data_base.genomes import create_genomes_table
 from cache.cache import delete_cache
 from file_managment.file_manager import PROJECTS_DIR, check_if_path_exists, get_project_path
 from cache.db_connection import create_db, get_db_path#, initialize_db_connection
-from redis_orm.redis_client import new_project
+
 
 
 

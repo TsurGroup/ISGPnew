@@ -4,7 +4,7 @@ import openpyxl
 import pandas as pd
 
 
-from version import VERSION
+from config.version import VERSION
 from file_managment.file_manager import get_excel_path
 from cache.cache import get_experiment_data, get_project_constants_from_cache
 from models.genome import Genome

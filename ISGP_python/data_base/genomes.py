@@ -121,7 +121,7 @@ def get_generation_genomes_id(run: int, generation: int):
         cursor = conn.cursor()
         
         cursor.execute('''
-            SELECT id, fitness, best_model 
+            SELECT id, compatibility_penalty, best_model 
             FROM Genome 
             WHERE run = ? AND generation = ?
             ORDER BY best_model DESC, id ASC  -- Ensure best_model=True comes first

@@ -16,7 +16,7 @@ const commonStyles = {
 
 // Styles for the scrollable content area
 const scrollableContentStyles = {
-  maxHeight: 'calc(100vh - 300px)', // Adjust height as needed
+  maxHeight: '60vh', // Adjust height as needed
   overflowY: 'auto',
   padding: '16px', 
   maxWidth: '100%'// Optional: add padding for aesthetics
@@ -71,13 +71,13 @@ const KKTGraphs = ({ KKTGraph1, KKTGraph2 }) => {
           </Box>
         )}
         {dataSetId === '2' && (
-          <Box sx={commonStyles}>
+  
              <Box sx={commonStyles}>
             <GenericGraph data={KKTGraph2.realToImaginaryGraph} config={realToImaginaryGraphConfig} />
             <GenericGraph data={KKTGraph2.imaginaryToRealGraph} config={imaginaryToRealGraphConfig} />
             <GenericGraph data={KKTGraph2.coleColeGraph} config={coleColeGraphConfig} />
           </Box>
-          </Box>
+  
         )}
       </Box>
     </Box>

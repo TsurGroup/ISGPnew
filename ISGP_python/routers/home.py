@@ -1,17 +1,15 @@
-import json
 from typing import List
 from fastapi import HTTPException
-import logging
 import uuid
 from fastapi import APIRouter, Response
 from fastapi.responses import JSONResponse
 import httpx
-from version import VERSION
-from file_managment.file_manager import  get_config_path
+from modules.home_module.home_handler import create_new_project, get_project_names, load_project
+from config.version import VERSION
 from project_context import current_project_name
 #from cache.db_connection import initialize_db_connection
 from packaging import version
-from modules.login_module.login_handler import create_new_project, get_project_names, load_project#, create_project
+
 
 router = APIRouter()
 

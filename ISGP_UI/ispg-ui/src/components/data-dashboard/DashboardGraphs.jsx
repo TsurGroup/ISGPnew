@@ -1,18 +1,29 @@
 import Box from '@mui/material/Box';
 import GenericGraph from '../global/GenericGraph.jsx'
 
- const commonStyles = {
-     //top:'120px',
-     display:'flex',
-     flexDirection: 'row',
-     justifyContent: 'center',
-     alignItems: 'center',
-     gap: '40px',
-     position:'relative',
-     margin: '0',
-     flexWrap: 'wrap'
+//  const commonStyles = {
+//      //top:'120px',
+//      display:'flex',
+//      flexDirection: 'row',
+//      justifyContent: 'center',
+//      alignItems: 'center',
+//      gap: '40px',
+//      position:'relative',
+//      margin: '0',
+//      flexWrap: 'wrap'
      
-   };
+//    };
+
+const commonStyles = {
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr', // Default to 2x2 grid layout
+  gridTemplateRows: '1fr 1fr',
+  gridColumnGap: '110px', // Gap between columns
+  gridRowGap: '20px', // Gap between rows
+  width: '100%',
+  maxWidth: '70vw', // Adjust as needed
+  margin: 'auto',
+};
 
    const impedanceGraphconfig = {
     xAxisTitle:"Z",
@@ -66,3 +77,5 @@ const DashboardGraphs = ({SolutionGraphData,ResidualGraphData,ImpedanceGraphData
   }
   
   export default DashboardGraphs;
+
+  

@@ -1,7 +1,8 @@
 import sys
 from pathlib import Path
+from config.env import get_env
 from project_context import current_project_name
-
+from tests.test_data import test_project_name
 
 def get_base_dir():
     """Determine the base directory of the project."""
@@ -37,7 +38,10 @@ def get_config_path():
 
 def get_project_path():
     """Get the path for a specific project."""
-    project_name = current_project_name.get()
+    if get_env() == "test":
+        project_name = test_project_name
+    else:
+      project_name = current_project_name.get()
     if not project_name:
         raise ValueError("Project name is not set in current_project_name.")
     project_path = PROJECTS_DIR / project_name
@@ -47,7 +51,10 @@ def get_project_path():
 
 def get_db_path():
     """Get the path for the SQLite database of a specific project."""
-    project_name = current_project_name.get()
+    if get_env() == "test":
+        project_name = test_project_name
+    else:
+      project_name = current_project_name.get()
     if not project_name:
         raise ValueError("Project name is not set in current_project_name.")
     return get_project_path() / f"{project_name}.db"
@@ -55,7 +62,10 @@ def get_db_path():
 
 def get_excel_path():
     """Get the path for the Excel file of a specific project."""
-    project_name = current_project_name.get()
+    if get_env() == "test":
+        project_name = test_project_name
+    else:
+      project_name = current_project_name.get()
     if not project_name:
         raise ValueError("Project name is not set in current_project_name.")
     return get_project_path() / f"{project_name}.xlsx"

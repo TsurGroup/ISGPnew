@@ -1,61 +1,39 @@
-import React from 'react';
-import { Box, Typography, Accordion, AccordionSummary, AccordionDetails, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import React, { useState } from 'react';
+import { 
+  Box, Typography, Accordion, AccordionSummary, 
+  AccordionDetails, Button, CircularProgress 
+} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Button from '@mui/material/Button';
-
-import DataSetService from '../../services/DataSetService.js'
-
+import DataSetService from '../../services/DataSetService';
 
 const FileGuidelines = () => {
+  const [expanded, setExpanded] = useState(false);
+  const [loading, setLoading] = useState({ text: false, excel: false });
 
-  const downloadTextFile = async () => {
-    try {
-      
-      const data = await DataSetService.getExampleTextFile();
-      // Create a blob URL from the response
-      const fileURL = window.URL.createObjectURL(new Blob([data]));
-      
-      // Create a link element to download the file
-      const link = document.createElement('a');
-      link.href = fileURL;
-      link.setAttribute('download', 'downloaded_file.txt'); // Name for the downloaded file
-
-      // Append the link to the document and simulate a click
-      document.body.appendChild(link);
-      link.click();
-
-      // Clean up the link element
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error('Error downloading the file:', error);
+  const handleAccordionChange = (panel) => (event, isExpanded) => {
+    if (!loading.text && !loading.excel) {  // Prevent opening if downloading
+      setExpanded(isExpanded ? panel : false);
     }
   };
 
-  const downloadExcelFile = async () => {
+  const downloadFile = async (type) => {
+    setLoading((prev) => ({ ...prev, [type]: true })); // Show spinner & disable button
+
     try {
-      
-      const data = await DataSetService.getExampleExcelFile();
-      // Create a blob URL from the response
-      const fileURL = window.URL.createObjectURL(new Blob([data]));
-      
-      // Create a link element to download the file
-      const link = document.createElement('a');
-      link.href = fileURL;
-      link.setAttribute('download', 'example.xlsx');  // Set the file name
-
-      // Append the link to the document and simulate a click
-      document.body.appendChild(link);
-      link.click();
-
-      // Clean up the link element
-      document.body.removeChild(link);
+      if (type === 'text') {
+        await DataSetService.getExampleTextFile();
+      } else {
+        await DataSetService.getExampleExcelFile();
+      }
     } catch (error) {
-      console.error('Error downloading the file:', error);
+      console.error(`Error downloading ${type} file:`, error);
+    } finally {
+      setLoading((prev) => ({ ...prev, [type]: false })); // Hide spinner & enable button
     }
   };
 
   return (
-    <Box sx={{  maxWidth: '100%', wordWrap: 'break-word' }}>
+    <Box sx={{ maxWidth: '100%', wordWrap: 'break-word' }}>
       <Typography variant="h4" gutterBottom>
         Upload Your File
       </Typography>
@@ -63,7 +41,12 @@ const FileGuidelines = () => {
         To proceed, please upload either a text file or an Excel file that follows the required formats:
       </Typography>
 
-      <Accordion>
+      {/* Text File Accordion */}
+      <Accordion 
+        expanded={expanded === 'text'} 
+        onChange={handleAccordionChange('text')}
+        disabled={loading.text || loading.excel}  // Disable accordion while downloading
+      >
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
           <Typography variant="h5">1. Text File Format (.txt):</Typography>
         </AccordionSummary>
@@ -80,13 +63,24 @@ const FileGuidelines = () => {
               </li>
               <li>No headers or extra formatting.</li>
             </ul>
-
-            <Button  variant="contained" onClick={downloadTextFile}> Get </Button>
+            <Button 
+              variant="contained" 
+              onClick={() => downloadFile('text')}
+              disabled={loading.text || loading.excel}  // Disable button while downloading
+              sx={{ display: 'flex', alignItems: 'center', gap: 1, textTransform: 'none' }}
+            >
+              {loading.text ? <CircularProgress size={20} /> : 'Download Example'}
+            </Button>
           </Typography>
         </AccordionDetails>
       </Accordion>
 
-      <Accordion>
+      {/* Excel File Accordion */}
+      <Accordion 
+        expanded={expanded === 'excel'} 
+        onChange={handleAccordionChange('excel')}
+        disabled={loading.text || loading.excel}  // Disable accordion while downloading
+      >
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel2a-content" id="panel2a-header">
           <Typography variant="h5">2. Excel File Format (.xlsx):</Typography>
         </AccordionSummary>
@@ -100,8 +94,14 @@ const FileGuidelines = () => {
                 <li><strong>Column 3</strong>: "Z'' (b)" (Imaginary Impedance)</li>
               </ul>
             </ul>
-
-             <Button  variant="contained" onClick={downloadExcelFile}> Get </Button>
+            <Button 
+              variant="contained" 
+              onClick={() => downloadFile('excel')}
+              disabled={loading.text || loading.excel}  // Disable button while downloading
+              sx={{ display: 'flex', alignItems: 'center', gap: 1,textTransform: 'none'}}
+            >
+              {loading.excel ? <CircularProgress size={20} /> : 'Download Example'}
+            </Button>
           </Typography>
         </AccordionDetails>
       </Accordion>

@@ -104,12 +104,6 @@ def kkt(data_set_id):
     return Real_KK,Real_KK1
 
 
-
-
-
-
-
-
 def kkt_transform(frequency, impedance):
     angular_frequency = 2 * np.pi * frequency
     index = len(angular_frequency)
@@ -147,8 +141,3 @@ def kkt_transform(frequency, impedance):
         KK1_result[m] = (2 * angular_frequency[m] / np.pi) * integral_value
 
     return KK_result, KK1_result
-
-
-
-
-

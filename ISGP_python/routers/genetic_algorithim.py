@@ -1,11 +1,11 @@
 import asyncio
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response , WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, StreamingResponse
 from sse_starlette import EventSourceResponse
 from project_context import get_current_project_name
 from cache.cache import get_project_status, set_project_status
 from models.project_data import ProjectStatus
-from modules.genetic_algorithm.genetic_algorithim_parallel import run_evolution
+from modules.genetic_algorithm.genetic_algorithm import run_evolution
 #from redis_orm.redis_client import get_project_status, set_project_status
 from user_context import get_current_user,current_user_id
 
@@ -36,6 +36,27 @@ def runEvolution(project_name: str = Depends(get_current_project_name)):
     finally:
         print("runEvolution endpoint finished.")
 
+@router.websocket("/ws/runEvolution")
+async def websocket_run_evolution(websocket: WebSocket, project_name: str = Depends(get_current_project_name)):
+    await websocket.accept()
+    set_project_status(ProjectStatus.Running)
+
+    try:
+         for data in run_evolution():  # assuming run_evolution is async
+            await websocket.send_text(data.json())
+
+            project_status = get_project_status()
+            if project_status == ProjectStatus.Aborted:
+                set_project_status(ProjectStatus.Finished)
+                break
+
+    except WebSocketDisconnect:
+        print("WebSocket disconnected by client.")
+        set_project_status(ProjectStatus.Finished)
+
+    except Exception as e:
+        print(f"Error during WebSocket evolution: {e}")
+        set_project_status(ProjectStatus.Finished)
 
 @router.post("/abortEvolution")
 async def abort_evolution( project_name: str = Depends(get_current_project_name)):#user_id: str = Depends(get_current_user)

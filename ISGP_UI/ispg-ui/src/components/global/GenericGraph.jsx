@@ -52,12 +52,13 @@ const GenericGraph = ({ data, config }) => {
     };
 
     return (
-        <div style={{ width: '500px', height: '200px' }}>
+        <div style={{ width: '100%', height: '100%' }}>
             <Scatter
                 data={chartData}
                 options={{
                     responsive: true,
-                    maintainAspectRatio: false, // Allow the chart to resize freely
+                    maintainAspectRatio: true, // Maintain aspect ratio
+                    aspectRatio: 2, // Ensures x:y ratio stays constant
                     plugins: {
                         legend: {
                             position: 'top',
@@ -104,6 +105,7 @@ const GenericGraph = ({ data, config }) => {
         </div>
     );
 };
+
 GenericGraph.propTypes = {
     data: PropTypes.objectOf(
         PropTypes.arrayOf(

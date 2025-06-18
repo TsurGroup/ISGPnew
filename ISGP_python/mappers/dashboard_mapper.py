@@ -2,7 +2,6 @@ import numpy as np
 
 from cache.cache import get_discrepancies, get_experiment_data, get_project_constants_from_cache
 
-
 from models.experiment_data import ExperimentData
 from view_models.graph_view import PointData
 from view_models.dashboard_view import DashboardView, DiscrepancyGraph,ImpadanceGraphView, ModelGraphView,ResidualGraphView
@@ -108,7 +107,7 @@ def get_dashboard_view(run_num,generation,genome:Genome):
     dashboard_view = DashboardView()
     dashboard_view.run = run_num
     dashboard_view.generation = generation
-    dashboard_view.fitness = round(genome.new_fitness, 5)
+    dashboard_view.fitness = round(genome.compatibility_penalty, 5)# what should be displayed
     dashboard_view.modelString = genome.get_latex_string()
 
     experiment_data = get_experiment_data(0)

@@ -22,21 +22,15 @@ async def get_generation_models(run_num:int,generation_num:int,project_name: str
 
     return genomes
 
+# @router.get("/getGenerationModel/{run_num}/{generation_num}")
+# async def get_generation_model(run_num:int,generation_num:int,project_name: str = Depends(get_current_project_name)):
+#     dashboard_view = get_generation_data(run_num,generation_num)
 
-
-@router.get("/getGenerationModel/{run_num}/{generation_num}")
-async def get_generation_model(run_num:int,generation_num:int,project_name: str = Depends(get_current_project_name)):
-    dashboard_view = get_generation_data(run_num,generation_num)
-
-    return dashboard_view
-
-
-
+#     return dashboard_view
 
 
 @router.get("/getModel/{genome_id}")
 async def get_genome_model(genome_id:int,project_name: str = Depends(get_current_project_name)):
-    # Path to the file to be downloaded
     genome = get_genome_data(genome_id)
 
     return genome

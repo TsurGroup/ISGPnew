@@ -18,12 +18,12 @@ import DataItem from '../../global/DataItem';
 //var Latex = require('react-latex');
 
 const commonStyles = {
-  top:'20px',
+//  top:'20px',
   display:'flex',
   flexDirection: 'column',
   //justifyContent: 'center',
   alignItems: 'center',
-  gap: '45px',
+  gap: '20px',
   position:'relative',
   flexWrap: 'wrap',
 
@@ -37,7 +37,7 @@ const commonStyles2 = {
   gap: '35px',
   position:'relative',
   //flexWrap: 'wrap',
-  maxHeight: '100vh',
+  //maxHeight: '100vh',
   width:'100%' /* or height: 100vh; */
 };
 

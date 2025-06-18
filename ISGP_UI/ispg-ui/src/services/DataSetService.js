@@ -15,9 +15,9 @@ const DataSetService = {
     }
   },
 
-  getFilteredData: async (w0,w1) => {
+  getFilter: async (w0,w1) => {
     try {
-      const response = await axios.get(`${BASE_URL}/getFilteredData/${w0}/${w1}`, {
+      const response = await axios.get(`${BASE_URL}/getFilter/${w0}/${w1}`, {
         withCredentials: true // Include cookies with the request
       });
       return response.data;
@@ -26,31 +26,66 @@ const DataSetService = {
     }
   },
 
-  getExampleTextFile: async () => {
+  setFilter: async (data) => {
     try {
-      const response = await axios.get(`${BASE_URL}/getExampleTextFile`,
-        { responseType: 'blob',  
-          withCredentials: true
-       }
-        // Important to handle file download
-      );
+      const response = await axios.post(`${BASE_URL}/setFilter`, data, {
+        withCredentials: true
+      });
       return response.data;
     } catch (error) {
-      throw error; // Handle error in the component where DataSetService.uploadData is called
+      throw error;
     }
   },
+  
+
+  getExampleTextFile: async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/getExampleTextFile`, {
+        responseType: 'blob',  
+        withCredentials: true
+      });
+  
+      // Create a blob URL for the file
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'example.txt'); // Set the filename
+      document.body.appendChild(link);
+      link.click();
+  
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error("Error downloading text file:", error);
+      throw error;
+    }
+  },
+  
 
   getExampleExcelFile: async () => {
     try {
-      const response = await axios.get(`${BASE_URL}/getExampleExcelFile`,
-        { responseType: 'blob',  
-          withCredentials: true
-       }
-        // Important to handle file download
-      );
-      return response.data;
+      const response = await axios.get(`${BASE_URL}/getExampleExcelFile`, {
+        responseType: 'blob',  
+        withCredentials: true
+      });
+  
+      // Create a blob URL for the file
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'example.xlsx'); // Set the filename
+      document.body.appendChild(link);
+      link.click();
+  
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
     } catch (error) {
-      throw error; // Handle error in the component where DataSetService.uploadData is called
+      console.error("Error downloading text file:", error);
+      throw error;
     }
   },
 

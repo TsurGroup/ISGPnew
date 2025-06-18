@@ -13,8 +13,7 @@ import ConfirmNavigationDialog from './ConfirmNavigationDialog'
 import DashboardControls from './DashboardControls'
 
 import { abortEvolution } from '../../services/DashboardService';
-import { createEventSource } from '../../services/DashboardService';
-
+import { createEventSource,connectToEvolution,closeEvolutionSocket } from '../../services/DashboardService';
 
 import useNavigationBlocker from '../../hooks/useNavigationBlocker';
 
@@ -63,12 +62,10 @@ const commonStyles3 = {
 
   
 const DataDashboard = () => {
-    const [data, setData] = useState(
+const [data, setData] = useState(
       {impadanceGraphView:{dataset1:[],dataset2:[],model: []},impedanceGraph:[],modelGraph :{model:[]},
       residualGraph:{dataset1:[],dataset2:[]},run:1,fitness:null,area:null,generation:null,modelString:'$$',
       discrepancyGraph:{currentModel:[],bestModels:[],allDiscrepancies:[],}});
-
-
 const [isPaused, setIsPaused] = useState(false);
 const [startTime] = useState(Date.now()); // Set initial start time
 const [open, setOpen] = useNavigationBlocker();
@@ -101,44 +98,74 @@ const navigate = useNavigate();
 //   };
 // }, [navigate]);
 
-useEffect(() => {
-  if(isPaused)
-   {
-    navigate('/CompletionScreen');
-   }
-}, [isPaused]);
+// useEffect(() => {
+//   if(isPaused)
+//    {
+//     navigate('/CompletionScreen');
+//    }
+// }, [isPaused]);
       
-useEffect(() => {
-  const handleNewEvents = (eventData) => {
-    setData(eventData);
-  };
+// useEffect(() => {
+//   const handleNewEvents = (eventData) => {
+//     setData(eventData);
+//   };
 
-  const handleError = (error) => {
-    console.error('Error receiving events:', error);
-    setIsPaused(true); // Pause the timer when an error occurs
-  };
+//   const handleError = (error) => {
+//     console.error('Error receiving events:', error);
+//     setIsPaused(true); // Pause the timer when an error occurs
+//   };
 
-  const handleOpen = () => {
-    setIsPaused(false); // Resume the timer when the connection is opened
-  };
+//   const handleOpen = () => {
+//     setIsPaused(false); // Resume the timer when the connection is opened
+//   };
 
-  const handleClose = () => {
-    setIsCompleted(true); // Resume the timer when the connection is opened
-  };
+//   const handleClose = () => {
+//     setIsCompleted(true); // Resume the timer when the connection is opened
+//   };
 
-  const eventSource = createEventSource(handleNewEvents, handleError, handleOpen,handleClose);
+//   const eventSource = createEventSource(handleNewEvents, handleError, handleOpen,handleClose);
 
-  eventSource.onclose = () => {
-    console.log('Connection closed by the server.');
+//   eventSource.onclose = () => {
+//     console.log('Connection closed by the server.');
     
+//   };
+
+//   return () => {
+//     console.log('Closing EventSource from the frontend.');
+//     eventSource.close();
+    
+//   };
+// }, []);
+
+useEffect(() => {
+  const handleNewEvents = (incoming) => {
+    setData(incoming);
+    console.log(incoming);
   };
+
+  const handleSocketClose = () => {
+    setIsPaused(true);
+    setIsCompleted(true);
+    navigate('/CompletionScreen');
+  };
+
+  const handleSocketError = (err) => {
+    setIsPaused(true);
+    alert('A connection error occurred. Please check your connection or try again later.');
+  };
+
+  connectToEvolution(
+    handleNewEvents,
+    handleSocketClose,
+    handleSocketError
+  );
 
   return () => {
-    console.log('Closing EventSource from the frontend.');
-    eventSource.close();
-    
+    setIsPaused(true);
+    closeEvolutionSocket();
   };
-}, []);
+}, [navigate]);
+
 
 
 const handleClose = () => {

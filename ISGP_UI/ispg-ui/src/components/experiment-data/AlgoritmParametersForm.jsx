@@ -21,6 +21,7 @@ const commonStyles = {
   alignItems: 'flex-start',
   gap: '15px',
   width: '60%',
+  
 };
 
 const commonStyles2 = {
@@ -33,7 +34,7 @@ const commonStyles2 = {
 
 const buttonStyle = {
   position: 'absolute',
-  top: '550px',
+  top: '650px',
   right: '30px',
   width: '10%',
 };

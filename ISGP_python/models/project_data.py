@@ -62,9 +62,10 @@ class ProjectConstants:
             interval=data.get('interval', 1.0)  # Retrieve normalization_factor with default  # Retrieve normalization_factor with default
         )
     
-    def apply_filter(self,data):
-      if self.use_filter:
-        return data #* self.filter
-      return data
+    def apply_filter(self, data):
+     if self.use_filter:
+        data *= self.filter  # Modify data in place
+     return data
+
 
     

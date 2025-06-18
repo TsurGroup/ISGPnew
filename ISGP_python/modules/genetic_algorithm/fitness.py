@@ -16,7 +16,7 @@ def weighted_average(sample, weight):
 
     sample_avg = []
 
-    num_intervals = len(sample) // weight
+    num_intervals = len(sample) // weight #the floor division // rounds the result down to the nearest whole number
 
     for i in range(num_intervals):
         interval_average = np.mean(sample[i * weight : (i + 1) * weight])
@@ -53,8 +53,13 @@ def fit(genome:Genome,experiment_data: ExperimentData,project_constants:ProjectC
   #SSY1=(experiment_data.imaginary_impedance-imaginary_impedance_avg)*project_constants.filter
   #SSYr1=(experiment_data.real_impedance-real_impedance_avg)*project_constants.filter
   
-  SSY1=project_constants.apply_filter(experiment_data.imaginary_impedance-imaginary_impedance_avg)
-  SSYr1=project_constants.apply_filter(experiment_data.real_impedance-real_impedance_avg)
+  SSY1= experiment_data.imaginary_impedance-imaginary_impedance_avg
+  SSYr1=experiment_data.real_impedance-real_impedance_avg
+
+
+  if(project_constants.use_filter):
+      SSY1 *= project_constants.filter
+      SSYr1 *= project_constants.filter
   #print('SSY1 is: '+ str(SSY1))
   #print('SSYr1 is: '+ str(SSYr1))
 
@@ -64,8 +69,12 @@ def fit(genome:Genome,experiment_data: ExperimentData,project_constants:ProjectC
   #SSF1=(yi-experiment_data.imaginary_impedance)*project_constants.filter
   #SSFr1=(y_r-experiment_data.real_impedance)*project_constants.filter
   
-  SSF1=project_constants.apply_filter(yi-experiment_data.imaginary_impedance)
-  SSFr1=project_constants.apply_filter(y_r-experiment_data.real_impedance)
+  SSF1=yi-experiment_data.imaginary_impedance
+  SSFr1=y_r-experiment_data.real_impedance
+
+  if(project_constants.use_filter):
+      SSF1 *= project_constants.filter
+      SSFr1 *= project_constants.filter
   
   SSF = np.sqrt(np.mean(SSF1 ** 2))
   SSFr = np.sqrt(np.mean(SSFr1 ** 2))
@@ -107,13 +116,13 @@ def free_parameters_penalty(genome:Genome):
 
 def peakes_num_penalty(genome:Genome,num_of_guessed_peaks):
  num_of_found_peaks = len(genome.functions)
- a=5
+
  #penalty3 = 1 / (1 + np.exp(2 * (num_of_found_peaks - num_of_guessed_peaks - 2.5)))
  penalty3 = 1 / (1 + np.exp(2 * (num_of_found_peaks - num_of_guessed_peaks - 2.3)))
  return penalty3
 
-def peakes_width_penalty(genome: Genome):
- sigmamax = 8; ###the range of measured freq (in log scale)
+def peakes_width_penalty(genome: Genome,algorithm_parameters:AlgorithmParameters):
+ sigmamax = algorithm_parameters.width_factor; ###the range of measured freq (in log scale)
  sigma = genome.get_genome_peaks_width()
  penalty4 = 1/(1 + np.exp(-7*(sigmamax-sigma)/sigmamax))
  return penalty4
@@ -121,16 +130,6 @@ def peakes_width_penalty(genome: Genome):
 #def area_penalty(genome: Genome,user_id):
 def area_penalty(genome:Genome,experiment_data: ExperimentData,project_constants:ProjectConstants):
  FitnessGauss = 0.05
- #tau_diff = 3
-
- #experiment_data = get_data_set(user_id,0)
- #eangular_velocity = 1/(10**experiment_data.logarithmic_relaxation_time)
-
- #point = -(experiment_data.logarithmic_relaxation_time[0]-experiment_data.logarithmic_relaxation_time[1])/tau_diff
- #print(experiment_data.logarithmic_relaxation_time)
- #print('point is:' + str(point))
- #time_samples = np.arange(-20, 20, point) ## t
- 
 
  area = genome.get_area(project_constants.time_samples,project_constants.interval)
  #print('area is: ' + str(area))
@@ -151,7 +150,7 @@ def fitness(genome:Genome,experiment_data: ExperimentData,algorithm_parameters:A
  penalty3 = peakes_num_penalty(genome,algorithm_parameters.expected_peaks_num)
  genome.peakes_num_penalty = penalty3
 
- penalty4 = peakes_width_penalty(genome)
+ penalty4 = peakes_width_penalty(genome,algorithm_parameters)
  genome.peakes_width_penalty = penalty4
 
  penalty5 = area_penalty(genome,experiment_data,project_constants)

@@ -21,17 +21,18 @@ import { useLocation } from "react-router-dom";
      flexDirection: 'column',
      justifyContent: 'center',
      alignItems: 'center',
-     gap: '40px',
-     position:'relative',
-     margin: '0',
-     paddingLeft:'20px'
+     gap: '15px',
+    // position:'relative',
+    // margin: '0',
+    // paddingLeft:'20px',
+    width:'100%'
      
    };
 
 const DataGraphs = ({data})=> {
     //const state  = useLocation();
     //const data = state.state.data;
-    console.log(data);
+   // console.log(data);
 
   //   const config = {
   //     dataset1: { label: 'Data set 1', color: '#ff6384', pointRadius: 2, showLine: true },

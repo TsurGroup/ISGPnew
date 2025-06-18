@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.optimize import minimize
+from decorators.timer_decorator import timer_func
 from models.functions import *
 
 from models.project import AlgorithmParameters
@@ -9,9 +10,9 @@ from models.genome import Genome
 from models.project_data import ProjectConstants
 from typing import List, Tuple
 
+method = 0
 
 def new_function(func_type:FunctionType,function_parameters:FunctionParameters):
-    
     if func_type == FunctionType.PseudoDelta:
         return PseudoDelta(function_parameters)
     elif func_type == FunctionType.Gaussian:
@@ -38,12 +39,10 @@ def new_function(func_type:FunctionType,function_parameters:FunctionParameters):
         return AsymmetricHyperbolicSecant(function_parameters)
     elif func_type == FunctionType.PseudoVoigt:
         return PseudoVoigt(function_parameters)
-    
     elif func_type == FunctionType.LeftPseudoDelta:
         return LeftPseudoDelta(function_parameters)
     elif func_type == FunctionType.RightPseudoDelta:
         return RightPseudoDelta(function_parameters)
-
     elif func_type == FunctionType.NegativePseudoDelta:
         return NegativePseudoDelta(function_parameters)
     elif func_type == FunctionType.NegativeGaussian:
@@ -111,13 +110,27 @@ def get_genome_bounds(genome: Genome, logarithmic_relaxation_time, algorithm_par
     }
 
     for function in genome.functions:
-        bounds.append((0, np.inf))
+        bounds.append((0, np.inf))#
         bounds.append((algorithm_parameters.lower_bounds[function.func_type], algorithm_parameters.upper_bounds[function.func_type]))
         bounds.extend(additional_bounds.get(function.func_type, []))
 
     return bounds
 
-def get_genome_parameters_new(genome:Genome,experiment_data: ExperimentData,algorithm_parameters:AlgorithmParameters,project_constants:ProjectConstants)->Genome:
+# def get_genome_parameters(genome:Genome,experiment_data: ExperimentData,algorithm_parameters:AlgorithmParameters,project_constants:ProjectConstants):
+#    if method is 0:
+#        return get_genome_parameters_by_parameter(genome,experiment_data,algorithm_parameters,project_constants)
+#    return get_genome_parameters_by_function(genome,experiment_data,algorithm_parameters,project_constants)
+
+def get_genome_parameters(genome:Genome,experiment_data: ExperimentData,algorithm_parameters:AlgorithmParameters,project_constants:ProjectConstants):
+   updated_genome=Genome()
+   if method == 0:
+       updated_genome = get_genome_parameters_by_parameter(genome,experiment_data,algorithm_parameters,project_constants)
+       return get_genome_parameters_by_parameter(updated_genome,experiment_data,algorithm_parameters,project_constants)
+   updated_genome = get_genome_parameters_by_function(genome,experiment_data,algorithm_parameters,project_constants)
+   return get_genome_parameters_by_function(updated_genome,experiment_data,algorithm_parameters,project_constants)
+
+
+def get_genome_parameters_by_parameter(genome:Genome,experiment_data: ExperimentData,algorithm_parameters:AlgorithmParameters,project_constants:ProjectConstants)->Genome:
     
     parameters = get_initial_guess(genome,experiment_data)
     genome_bounds = get_genome_bounds(genome,experiment_data.logarithmic_relaxation_time,algorithm_parameters)
@@ -161,11 +174,14 @@ def function_minimum(x0, genome:Genome, experiment_data:ExperimentData, project_
   samples = genome.get_genome_value(project_constants.time_samples)
   imag , real = simpson_matrix(samples,project_constants)
 
-  #ea1 = (experiment_data.real_impedance-real)*project_constants.filter
-  #ea2 = (experiment_data.imaginary_impedance-imag)*project_constants.filter
-
-  ea1 = project_constants.apply_filter(experiment_data.real_impedance-real)
-  ea2 = project_constants.apply_filter(experiment_data.imaginary_impedance-imag)
+  ea1 = experiment_data.real_impedance-real
+  ea2 = experiment_data.imaginary_impedance-imag
+  
+  if(project_constants.use_filter):
+      ea1 *= project_constants.filter
+      ea2 *= project_constants.filter
+  #ea1 = project_constants.apply_filter(experiment_data.real_impedance-real)
+  #ea2 = project_constants.apply_filter(experiment_data.imaginary_impedance-imag)
 
   ea = np.vstack((ea1, ea2))
   ea_flat = ea.flatten()

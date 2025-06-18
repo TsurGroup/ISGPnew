@@ -17,8 +17,8 @@ async def new_save_experiment_data(file1: UploadFile, file2: UploadFile):
     data_set1 = get_data_from_file(file1, file1_data)
     data_set2 = get_data_from_file(file2, file2_data)
     
-    project_constants = calculate_constant_data(data_set1,data_set2)
-    set_project_constants(project_constants)
+    #project_constants = calculate_constant_data(data_set1,data_set2)
+    #set_project_constants(project_constants)
 
     insert_experiment_data(data_set1, 0)
     insert_experiment_data(data_set2, 1)

@@ -1,19 +1,22 @@
 import math
 import numpy as np
-from data_base.algorithm_parameters import save_algorithm_parameters_to_db
+from modules.experiment_data_module.constant_data import calculate_constant_data
+from data_base.algorithm_parameters import get_algorithm_parameters_from_db, save_algorithm_parameters_to_db
 from models.functions.function import FunctionType
-from cache.cache import delete_project_constants_cache, get_experiment_data, get_project_constants_from_cache, set_algorithm_parameters_cache,get_algorithm_parameters_from_cache, update_project_constants_from_cache
-from mappers.algorithim_parameters_mapper import get_algorithm_parameters_from_view
+from cache.cache import get_experiment_data,get_algorithm_parameters_from_cache, set_algorithm_parameters_cache, set_project_constants
 from models.project import AlgorithmParameters, AlgorithmParametersView
 
 
 
 def get_algorithm_parameters():
  
- algorithm_parameters = get_algorithm_parameters_from_cache()
- if algorithm_parameters is None:
+    algorithm_parameters = get_algorithm_parameters_from_db()
+    
+    if len(algorithm_parameters.initial_functions) > 0:
+        return algorithm_parameters.to_view()
 
-    project_constants = get_project_constants_from_cache()
+
+    #project_constants = get_project_constants_from_cache()
     data_set1 = get_experiment_data(0)
     data_set2 = get_experiment_data(1)
     
@@ -21,7 +24,7 @@ def get_algorithm_parameters():
     tau_min = -math.ceil(-data_set1.logarithmic_relaxation_time[-1]) 
     pos_tau = 0.8*data_set1.logarithmic_relaxation_time[0]+0.2*data_set2.logarithmic_relaxation_time[0]##not sure y is called this. u should change and call it something else
 
-
+    print("im here")
     upper_bounds = {func.value: pos_tau for func in FunctionType}## this should be the normalization factor which is the max of real impadance(kk kroning)
     lower_bounds = {func.value: tau_min for func in FunctionType}
 
@@ -50,17 +53,19 @@ def get_algorithm_parameters():
     #algorithm_parameters.mutation_functions= [0,1,2,3]
     algorithm_parameters.mutation_functions= [0,1]
 
- return algorithm_parameters.to_view()
+    return algorithm_parameters.to_view()
 
 def set_algorithim_parameters(algorithim_parameters_view: AlgorithmParametersView):
     
  algorithm_params = AlgorithmParameters.from_view(algorithim_parameters_view)
- print(algorithm_params)
  save_algorithm_parameters_to_db(algorithm_params)
+ algorithm_params = get_algorithm_parameters_from_db()
+ set_algorithm_parameters_cache(algorithm_params)
 
-
- update_project_constants_from_cache()
- #delete_project_constants_cache()
+ expermint_data1  = get_experiment_data(0)
+ expermint_data2  = get_experiment_data(1)
+ project_constants = calculate_constant_data(expermint_data1,expermint_data2,algorithm_params) 
+ set_project_constants(project_constants)
  
  return 1
 

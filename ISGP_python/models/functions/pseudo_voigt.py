@@ -8,13 +8,13 @@ class PseudoVoigt(Function):
     lorentzian_variance: float = 1  # Width for Lorentzian component
     gauss_weight: float = 1   # Mixing factor
 
-    def __init__(self, function_parameters: FunctionParameters):
+    def __init__(self, function_parameters: FunctionParameters,lorentzian_variance:float =1,gauss_weight:float = 1):
         super().__init__(func_type=FunctionType.PseudoVoigt, parameters_num=5)  # Call base class constructor
         self.height = function_parameters.peaks_height  # Initialize attribute specific to the subclass
         self.mean = function_parameters.tau_guess
         self.gaussian_variance = function_parameters.peaks_width
-        self.lorentzian_variance = 1  # Assuming initial values for sigma and gamma are the same
-        self.gauss_weight = 1  # Mixing factor f (0 <= f <= 1)????
+        self.lorentzian_variance = lorentzian_variance  # Assuming initial values for sigma and gamma are the same
+        self.gauss_weight = gauss_weight  # Mixing factor f (0 <= f <= 1)????
 
     def get_value(self, x):
         # Convert x to a NumPy array for element-wise operations if it's not already one
@@ -27,7 +27,7 @@ class PseudoVoigt(Function):
         lorentzian_part = 1 / (1 + ((x - self.mean) / self.lorentzian_variance) ** 2)
         
         # Pseudo-Voigt function: combine Gaussian and Lorentzian components
-        result = self.height * (self.f * gaussian_part + (1 - self.gauss_weight) * lorentzian_part)
+        result = self.height * (self.gauss_weight * gaussian_part + (1 - self.gauss_weight) * lorentzian_part)
         
         return result
       
@@ -57,3 +57,15 @@ class PseudoVoigt(Function):
      
     def to_string(self):
         return " "
+    @classmethod
+    def from_dict(cls, data):
+        # Convert the dictionary back to the ColeCole object
+        function_parameters = FunctionParameters(
+            peaks_height=data["height"],
+            tau_guess=data["mean"],
+            peaks_width=data["gaussian_variance"]
+        )
+        # Use the alpha value from the database, or default to 0.7 if not provided
+        lorentzian_variance = data["lorentzian_variance"]
+        gauss_weight = data["gauss_weight"]
+        return cls(function_parameters=function_parameters, lorentzian_variance=lorentzian_variance,gauss_weight=gauss_weight)  # Pass alpha as an argument

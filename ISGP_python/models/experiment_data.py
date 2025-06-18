@@ -2,15 +2,24 @@ import json
 from typing import List
 import numpy as np
 
-# class ExperimentData(BaseModel):
-#     frequency: List[float] = []
-#     logarithmic_relaxation_time: List[float] = []
-#     real_impedance: List[float] = []
-#     imaginary_impedance: List[float] = []
 
 class ExperimentData:
+    '''
+       model of 
+    
+    '''
     def __init__(self, frequency: np.ndarray = None, logarithmic_relaxation_time: np.ndarray = None, real_impedance: np.ndarray = None, imaginary_impedance: np.ndarray = None):
-        self.frequency = frequency if frequency is not None else np.array([], dtype=float)
+        '''
+           creates an instance of eperiment data that holds all relevant measurments
+           
+           input:
+           frequency[Hz]: measured frequency
+           logarithmic_relaxation_time: calculated using frequency np.log10(1 / frequency)
+           real_impedance[ohm]: measured real impedance
+           imaginary_impedance[ohm]: measured imaginary impedance
+        '''
+        
+        self.frequency = frequency if frequency is not None else np.array([], dtype=float)  
         self.logarithmic_relaxation_time = logarithmic_relaxation_time if logarithmic_relaxation_time is not None else np.array([], dtype=float)
         self.real_impedance = real_impedance if real_impedance is not None else np.array([], dtype=float)
         self.imaginary_impedance = imaginary_impedance if imaginary_impedance is not None else np.array([], dtype=float)

@@ -39,9 +39,15 @@ class Losev(Function):
         return {"height": self.height, "mean": self.mean, "variance_1": self.variance_1,"variance_2":self.variance_2}
      
      def to_string(self):
-        # if self.mean > 0:
-        #    return f"\\frac{{{round(self.height, 5)}}}{{cosh(\\frac{{t-{round(self.mean, 5)}}}{{{abs(round(self.alpha, 5))}}})^2}}"
-        # if self.mean < 0:
-        #     return f"\\frac{{{round(self.height, 5)}}}{{cosh(\\frac{{t+{-round(self.mean, 5)}}}{{{abs(round(self.alpha, 5))}}})^2}}"   
-        # return f"\\frac{{{round(self.height, 5)}}}{{cosh(\\frac{{t}}{{{abs(round(self.alpha, 5))}}})^2}}" 
+
         return ""
+     
+     @classmethod
+     def from_dict(cls, data):
+        # Convert the dictionary back to the ColeCole object
+        function_parameters = FunctionParameters(
+            peaks_height=data["height"],
+            tau_guess=data["mean"],
+            peaks_width=data["variance"]
+        )
+        return cls(function_parameters=function_parameters)  # Pass alpha as an argument

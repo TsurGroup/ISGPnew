@@ -1,33 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 
-
 import { FormProvider, useForm } from '../../contexts/FormContext';
 import AlgorithmParametersService from '../../services/AlgorithimParametersService';
 import AlgoritmParametersForm from './AlgoritmParametersForm';
 import DataGraphs from './DataGraphs';
 
 const commonStyles = {
-  paddingTop: '30px',
+  paddingTop: '1%',
   display: 'flex',
   flexDirection: 'row',
-  justifyContent: 'center',
-  alignItems: 'flex-start',
-  gap: '10px',
+  justifyContent: 'space-between', // This will place the two blocks on opposite sides
+  gap: '5%', // Reduced gap to balance the layout and avoid overflow
   width: '100%',
+  paddingLeft: '1%', // Adjusting padding
+  paddingRight: '2%', // Adjusting padding on the right side as well
+  boxSizing: 'border-box', // Ensures that padding is included in the width
 };
 
-const buttonStyle = {
-  position: 'absolute',
-  bottom: '15px',
-  right: '30px',
-  width: '10%',
+const leftBlockStyles = {
+  width: '56%', // Left block now takes 48% of the width to leave room for the gap
+  padding: '0 10px', // Padding on the left and right sides only
+};
+
+const rightBlockStyles = {
+  width: '40%', // Right block now takes 48% of the width
+  padding: '0 10px', // Padding on the left and right sides only
 };
 
 const AlgorithmParameters = () => {
   const [data, setData] = useState({ realImpedanceGraph: { dataset1: [], dataset2: [] }, imaginaryImpedanceGraph: { dataset1: [], dataset2: [] } });
   const [experimentDataForm, setExperimentDataForm] = useState(null);
-  //const navigate = useNavigate();
 
   // Fetch data on mount
   useEffect(() => {
@@ -36,7 +39,7 @@ const AlgorithmParameters = () => {
         const experimentData = await AlgorithmParametersService.getExperimentData();
         setData(experimentData);
         const algorithmParameters = await AlgorithmParametersService.getAlgorithmParameters();
-        console.log(algorithmParameters)
+        console.log(algorithmParameters);
         setExperimentDataForm(algorithmParameters);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -51,46 +54,16 @@ const AlgorithmParameters = () => {
 
   return (
     <Box style={commonStyles}>
-      <Box sx={{ flex: 0.75 }}>
+      <Box style={leftBlockStyles}>
         <FormProvider initialFormData={experimentDataForm}>
-          {/* <InnerForm /> */}
           <AlgoritmParametersForm />
         </FormProvider>
       </Box>
-      <Box sx={{ flex: 0.2 }}>
+      <Box style={rightBlockStyles}>
         <DataGraphs data={data} />
       </Box>
-      {/* <Button onClick={saveUserParameters} style={buttonStyle}>
-        Save
-      </Button> */}
     </Box>
   );
 };
-
-// InnerForm Component that watches for changes in form data
-// const InnerForm = () => {
-//   const { formData, setFormData } = useForm();
-
-//   useEffect(() => {
-//     if (formData) {
-//       const newRemoveProbability = 1 - (parseFloat(formData.addProbability || 0) + parseFloat(formData.mutateProbability || 0));
-      
-//       if(parseFloat(formData.addProbability || 0)+parseFloat(formData.mutateProbability || 0) > 1)
-//       {
-//         const newAddProbability  = formData.addProbability
-//       }
-        
-        
-//       // Round the result to 2 decimal places
-//       const roundedRemoveProbability = parseFloat(newRemoveProbability.toFixed(2));
-
-//       setFormData((prevData) => ({
-//         ...prevData,
-//         removeProbability: roundedRemoveProbability,
-//       }));
-//     }
-//   }, [formData.addProbability, formData.mutateProbability, setFormData]);
-//   return <ExperimentDataForm />;
-// };
 
 export default AlgorithmParameters;

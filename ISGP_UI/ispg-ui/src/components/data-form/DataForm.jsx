@@ -11,23 +11,35 @@ import DataSetService from '../../services/DataSetService';
 import { useForm } from '../../contexts/FormContext';
 import FileGuidelines from './FileGuidelines';
 
-const outerBoxStyle = {
+const commonStyles = {
+  paddingTop: '1%',
   display: 'flex',
   flexDirection: 'row',
   justifyContent: 'space-between',
-  //padding: '40px',
-  margin: '0 auto',       // Centers the box horizontally
-  maxWidth: '90%',     // Limits the maximum width to avoid stretching
-  height: '80vh',         // Reduce height to avoid unnecessary scrolling
+  gap: '5%',
+  width: '100%',
+  paddingLeft: '2%',
+  paddingRight: '2%',
   boxSizing: 'border-box',
 };
 
-const commonStyles = {
+const leftBlockStyles = {
+  width: '48%',
+  padding: '0 10px',
   display: 'flex',
   flexDirection: 'column',
-  gap: '20px',
-  width:'500px'
+  gap:'10px'
 };
+
+const rightBlockStyles = {
+  width: '48%',
+  padding: '0 10px',
+  display: 'flex',
+  flexDirection: 'column',
+  //alignItems: 'flex-start',
+  gap: '15px',
+};
+
 
 const graphBox = {
   display: 'flex',
@@ -103,26 +115,20 @@ const DataForm = () => {
   };
 
   return (
-    <Box sx={outerBoxStyle}>
+    <Box sx={commonStyles}>
       <form onSubmit={fetchData}>
-        <Box sx={commonStyles}>
-          <FormInput />
-          {/* <KKTFormBox /> */}
-          {dataUploaded && <SigmoidFilter setFilteredData={setFilteredData} />}
-          <Button type="submit" sx={buttonStyle} variant="contained" disabled={loadingData}>
-            {loadingData ? <CircularProgress size={20} /> : 'Upload Data'}
-          </Button>
-          {error && <p style={{ color: 'red' }}>{error}</p>}
-        </Box>
+          <Box style={leftBlockStyles}>
+          <FormInput error={error} loadingData ={loadingData} dataUploaded={dataUploaded} />
+           {dataUploaded && <SigmoidFilter setFilteredData={setFilteredData} />}
+           </Box>
       </form>
+        
+      
 
-      <Box sx={graphBox}>
-        {dataUploaded ? (
-          <>
+      <Box style={rightBlockStyles}>
+        {dataUploaded ? (    <>
             <KKTGraphs KKTGraph1={KKTGraph1} KKTGraph2={KKTGraph2} />
-            <Button sx={buttonStyle} variant="contained" onClick={nextPage}>
-              Continue
-            </Button>
+            <Button sx={buttonStyle} variant="contained" onClick={nextPage}>Continue</Button>
           </>
         ) : (
           <FileGuidelines />

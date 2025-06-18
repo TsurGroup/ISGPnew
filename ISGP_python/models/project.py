@@ -3,6 +3,12 @@ from pydantic import BaseModel
 
 from models.functions.function import FunctionType
 
+class FilterDataView(BaseModel):
+    w0: float
+    w1: float
+    useFilter: bool
+
+
 class AlgorithmParametersView(BaseModel):
     runsNum: int = 3
     maxGenerations: int = 100
@@ -37,7 +43,7 @@ class AlgorithmParametersView(BaseModel):
 
 class AlgorithmParameters:
     def __init__(self, runs_num=3, max_generations=100, mutate_probability=0.5, add_probability=0.25, stop_criteria=10,duplication_factor=7,
-                 expected_peaks_num =3,norm_factor=0.05, point_diff=3, width_factor=8, alpha=0.8, population_size=20,w0 =0.001,w1 = 0.0001,
+                 expected_peaks_num =3,norm_factor=0.05, point_diff=3, width_factor=8, alpha=0.8,use_filter=False, population_size=20,w0 =0.001,w1 = 0.0001,
                  initial_functions=None, mutation_functions=None, upper_bounds=None, lower_bounds=None):
         self.runs_num = runs_num
         self.max_generations = max_generations
@@ -46,6 +52,7 @@ class AlgorithmParameters:
         self.stop_criteria = stop_criteria
         self.duplication_factor = duplication_factor
         
+        self.use_filter = use_filter
         self.w0 = w0
         self.w1 = w1
         

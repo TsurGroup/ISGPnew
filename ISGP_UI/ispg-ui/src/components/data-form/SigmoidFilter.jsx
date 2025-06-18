@@ -1,75 +1,81 @@
+import { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';  
 
 import NumberField from '../global/NumberField';
-
-import {useForm } from '../../contexts/FormContext';
-
-import DataSetService from '../../services/DataSetService.js'
-
-var Latex = require('react-latex');
+import { useForm } from '../../contexts/FormContext';
+import DataSetService from '../../services/DataSetService.js';
 
 const commonStyles = {
-    display:'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    border: '1px solid black',
-    borderRadius: '10px',
-    //alignItems: 'center',
-    //gap: '15px',
-    position:'relative',
-    //width: '20%',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'flex-start',
+  border: '1px solid black',
+  borderRadius: '10px',
+  position: 'relative',
+};
+
+const buttonStyle = {
+  textTransform: 'none',
+  width: 'auto',
+  alignSelf: 'flex-end',
+  marginLeft: 'auto',
+  marginTop: '20px',
+};
+
+
+const SigmoidFilter = ({ setFilteredData }) => {
+  const { formData, handleChange } = useForm();
+  const [loading, setLoading] = useState(false); // Track loading state
+
+  // Function to trigger the setFilter logic
+  const setFilter = async () => {
+    setLoading(true); // Show loading spinner when the request is made
+    const filterData = {
+      w0: formData['w0'],
+      w1: formData['w1'],
+      useFilter: formData['useFilter'],
+    };
+
+    try {
+      const res = await DataSetService.setFilter(filterData); // Send POST request with data in the body
+      console.log(res.success); // Handle the response, if necessary
+      setFilteredData(res.filteredData); // Update the filtered data
+    } catch (error) {
+      console.error('Error setting filter:', error);
+    } finally {
+      setLoading(false); // Hide loading spinner once the request is complete
+    }
   };
-  const buttonContainerStyles = {
-    marginTop: 'auto', // Pushes the button to the bottom
-    display: 'flex',
-    justifyContent: 'flex-end',
-  };
-  const a = '$$\\frac{1}{1+e^{-5 \\cdot\\frac{\\log(\\frac{w}{w_0})}{\\log(\\frac{w_1}{w_0})}}}$$'
-  const b = '$$\\frac{1}{2}$$' 
 
-
-
-const SigmoidFilter = ({setFilteredData,dataUploaded}) =>{     
-  const { formData,handleChange } = useForm();
+  useEffect(() => {
+    // This will run whenever formData['useFilter'] changes
+    setFilter();
+  }, [formData['useFilter']]); // Trigger effect when 'useFilter' changes
   
+  const handleCheckboxChange = (event) => {
+    // Directly toggle 'useFilter'
+    handleChange({ target: { name: 'useFilter', value: !formData['useFilter'] } });
+  };
 
-    const getFilteredData = async () => {
-        try {
-          const res = await DataSetService.getFilteredData(formData['w0'],formData['w1']);
-          console.log(res.filteredData);
-          setFilteredData(res.filteredData);
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      };
-
-
-    return (
-      <Box 
-      component="fieldset" 
-      sx={{
-        //p: 3,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        //gap: 2.5,
-        borderRadius: 2,
-      //  width: '500px',  
-      }}>
-            <legend>Sigmoid Filter</legend> 
-             <FormControlLabel control={<Checkbox checked={formData['useFilter']} onChange={() => handleChange({ target: { name:'useFilter', value: !formData['useFilter'] }})}/>} label="use filter" /> 
-             <NumberField name={'w0'} defaultValue = {0.25} minValue={0} maxValue={5000} increment={0.01} label={'w0'}/>
-             <NumberField name={'w1'}  defaultValue = {0.25} minValue={0} maxValue={5000} increment={0.01} label={'w1'}/> 
-             <Box style={buttonContainerStyles}>
-             <Button variant="contained"  size="small" disabled={!formData['useFilter'] || !dataUploaded}  onClick ={getFilteredData}>Show Filter</Button>
-             </Box>
-         </Box>
-        
-    )
-    
-}
+  return (
+    <Box component="fieldset" sx={{ p:2,display: 'flex', flexDirection: 'column', justifyContent: 'center', borderRadius: 2 ,gap:1}}>
+      <Typography variant="h6" component="legend"> Sigmoid Filter </Typography>
+      <Box sx={{display: 'flex',flexDirection: 'column', gap: '1px'}}>
+        <FormControlLabel sx = {{paddingLeft:'10px'}}control={<Checkbox checked={formData['useFilter']} onChange={handleCheckboxChange} />} label="Use Filter" />
+        <NumberField name={'w0'} defaultValue={0.25} minValue={0} maxValue={5000} increment={0.01} label={'w0'} />
+        <NumberField name={'w1'} defaultValue={0.25} minValue={0} maxValue={5000} increment={0.01} label={'w1'} />
+      </Box>
+  
+        <Button sx={buttonStyle} variant="contained"  disabled={loading || !formData['useFilter']} onClick={setFilter}>
+          Show Filter
+        </Button>
+  
+    </Box>
+  );
+};
 
 export default SigmoidFilter;

@@ -1,6 +1,7 @@
 import math
 import numpy as np
 #from cache.cache import get_project_constants_from_cache, set_project_constants
+from models.project import AlgorithmParameters
 from models.experiment_data import ExperimentData
 from models.functions.function import FunctionParameters
 from models.project_data import ProjectConstants
@@ -8,7 +9,7 @@ from models.project_data import ProjectConstants
 
 from user_context import current_user_id
 
-def calculate_constant_data(experiment_data_1: ExperimentData,experiment_data_2: ExperimentData): #seperate into smaller functions
+def calculate_constant_data(experiment_data_1: ExperimentData,experiment_data_2: ExperimentData,algorithm_parameters:AlgorithmParameters): #seperate into smaller functions
     
     project_constants = ProjectConstants()
     
@@ -36,6 +37,30 @@ def calculate_constant_data(experiment_data_1: ExperimentData,experiment_data_2:
     #project_constants.parameters = FunctionParameters(peaks_height,peaks_width,tau_max,tau_min)
     project_constants.parameters = FunctionParameters(peaks_height,peaks_width,tau_guess,tau_guess_pos)
     #print(project_constants.parameters.to_dict())
+
+    project_constants.use_filter = algorithm_parameters.use_filter
+    angular_velocity = 1/(10**experiment_data_1.logarithmic_relaxation_time)
+    
+    w0 = algorithm_parameters.w0
+    w1 = algorithm_parameters.w1
+    project_constants.filter = 1 / (1 + np.exp(-5 * np.log10(angular_velocity / w0) / np.log10(w1 / w0)))
+    
+    point_difference = algorithm_parameters.point_diff
+
+    project_constants.interval =  -(experiment_data_1.logarithmic_relaxation_time[1]-experiment_data_1.logarithmic_relaxation_time[0])/point_difference
+    
+    project_constants.time_samples = np.arange(-20, 20, project_constants.interval)
+    
+
+    angular_velocity = 1/(10**experiment_data_1.logarithmic_relaxation_time)
+    project_constants.kernel = 1 / (1 + 1j * ((np.power(10, project_constants.time_samples)).reshape(-1, 1) * angular_velocity))
+
+    c = np.ones(project_constants.time_samples.size)
+    c[1::2] = 4  # Modify every second line starting from the second line to be 4
+    c[2::2] = 2    # Modify every second line starting from the third line to be 2
+    c = c * (project_constants.interval / point_difference)
+
+    project_constants.c_vector = c
 
     return project_constants
 
