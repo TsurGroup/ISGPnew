@@ -52,6 +52,7 @@ def get_project_path():
 def get_db_path():
     """Get the path for the SQLite database of a specific project."""
     if get_env() == "test":
+        print("testing")
         project_name = test_project_name
     else:
       project_name = current_project_name.get()

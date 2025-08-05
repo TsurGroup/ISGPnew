@@ -103,7 +103,7 @@ def get_discrepancy_graph(genome:Genome,run:int,generation:int):
 
 
 def get_dashboard_view(run_num,generation,genome:Genome):
-    print(genome)
+    #print(genome)
     dashboard_view = DashboardView()
     dashboard_view.run = run_num
     dashboard_view.generation = generation

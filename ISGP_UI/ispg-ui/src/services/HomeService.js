@@ -46,6 +46,7 @@ const HomeService = {
       });
 
       if (response.status === 200) {
+        localStorage.setItem("projectName", projectName);
         return response.data;
       } else {
         throw new Error('Project creation failed');

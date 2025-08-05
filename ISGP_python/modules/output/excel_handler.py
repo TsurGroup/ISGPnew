@@ -16,15 +16,15 @@ def save_run_to_excel(run_num, model: Genome):
     experiment_data = get_experiment_data(0)
 
     point = -(experiment_data.logarithmic_relaxation_time[0] - experiment_data.logarithmic_relaxation_time[1]) / 3
-    normalization_factor = max(experiment_data.real_impedance)
+    normalization_factor = experiment_data.normalization_factor
     print(normalization_factor)
     area = model.get_area(project_constants.time_samples, point)
 
     # Prepare the data for the current run using the 'model' argument
     data_run = {
         'Frequency': experiment_data.frequency, 
-        'Z_Real': experiment_data.real_impedance,
-        'Z_Imaginary': experiment_data.imaginary_impedance
+        'Z_Real': experiment_data.real_impedance*normalization_factor,
+        'Z_Imaginary': experiment_data.imaginary_impedance*normalization_factor
     }
     
     # Create a DataFrame for experiment data

@@ -114,7 +114,7 @@ def remove_function(genome:Genome, mutation_options,project_constants:ProjectCon
         remove = np.random.randint(0, len(genome.functions) - 1)
         new_genome.functions = genome.functions[:remove] + genome.functions[remove + 1:]
     return new_genome
-@timer_func
+#@timer_func
 #def modify_genome(genome, genome_type_counter, algorithm_parameters: AlgorithmParameters, project_constants, experiment_data): # duplication factor code
 def modify_genome(genome, algorithm_parameters: AlgorithmParameters, project_constants, experiment_data):
     new_genome = Genome()

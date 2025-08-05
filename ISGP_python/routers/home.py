@@ -15,7 +15,7 @@ router = APIRouter()
 
 @router.get("/checkVersion")
 async def check_version():
-    url = "https://raw.githubusercontent.com/shem221/version-check/refs/heads/main/version"
+    url = "https://raw.githubusercontent.com/TsurGroup/version-check/refs/heads/main/version"
     
     try:
         async with httpx.AsyncClient() as client:

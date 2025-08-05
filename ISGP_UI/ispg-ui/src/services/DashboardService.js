@@ -94,10 +94,26 @@
 
 // export { createEventSource, abortEvolution ,connectToEvolution,closeEvolutionSocket};
 // services/DashboardService.js
-let socket = null;
-
+function getCookieValue(name) {
+  console.log(name);
+  console.log(document.cookie);
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  console.log(match)
+  return match ? match[2] : null;
+}
+let socket = null
 export function connectToEvolution(onMessage, onClose, onError) {
-  socket = new WebSocket('ws://127.0.0.1:8000/ws/runEvolution'); // update with correct URL/port
+  const projectName = localStorage.getItem("projectName");
+
+  if (!projectName) {
+    console.error("Project name in localStorage not found.");
+    if (onError) onError(new Error("Project name in localStorage not found"));
+    return;
+  }
+
+  // Append projectName as query parameter
+  const wsUrl = `ws://localhost:8000/ws/runEvolution?project_name=${encodeURIComponent(projectName)}`;
+  socket = new WebSocket(wsUrl);
 
   socket.onopen = () => {
     console.log('WebSocket connection opened');

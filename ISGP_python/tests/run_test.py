@@ -13,6 +13,10 @@ from data_base.experiment_data import create_experiment_table
 from data_base.genomes import create_genomes_table
 
 
+
+
+
+
 BASE_DIR = get_base_dir()
 PROJECTS_DIR = BASE_DIR / "projects"
 PROJECTS_DIR.mkdir(parents=True, exist_ok=True)  # Create once at initialization

@@ -34,7 +34,7 @@ def get_data_from_file(file: UploadFile, file_data: bytes):
         experiment_data =  get_data_from_excel(file_data)
     else:
         experiment_data = get_data_from_text(file_data)
-
+    
     normalize_impedance(experiment_data)
     return experiment_data
 
@@ -45,11 +45,7 @@ def get_data_from_excel(file_data: bytes):
     # Sort the DataFrame by the "Freq" column in ascending order
     df_sorted = df.sort_values(by="Freq").reset_index(drop=True)
 
-    experiment_data = ExperimentData()
-    experiment_data.frequency = df_sorted["Freq"].values
-    experiment_data.real_impedance = df_sorted["Z' (a)"].values
-    experiment_data.imaginary_impedance = df_sorted["Z'' (b)"].values
-    experiment_data.logarithmic_relaxation_time = np.log10(1 / (2 * np.pi * experiment_data.frequency))
+    experiment_data = ExperimentData(frequency=df_sorted["Freq"].values,real_impedance=df_sorted["Z' (a)"].values,imaginary_impedance=df_sorted["Z'' (b)"].values)
 
     return experiment_data
 
@@ -59,16 +55,16 @@ def get_data_from_text(file_data: bytes):
     # Sort the data by the first column (frequency)
     data_sorted = data[data[:, 0].argsort()]
 
-    experiment_data = ExperimentData()
-    experiment_data.frequency = data_sorted[:, 0]  # First column
-    experiment_data.real_impedance = data_sorted[:, 1]  # Second column
-    experiment_data.imaginary_impedance = data_sorted[:, 2]  # Third column
-    experiment_data.logarithmic_relaxation_time = np.log10(1 / (2 * np.pi * experiment_data.frequency))
+    experiment_data = ExperimentData(frequency=data_sorted[:, 0], real_impedance=data_sorted[:, 1],imaginary_impedance=data_sorted[:, 2])
+    # experiment_data.frequency = data_sorted[:, 0]  # First column
+    # experiment_data.real_impedance = data_sorted[:, 1]  # Second column
+    # experiment_data.imaginary_impedance = data_sorted[:, 2]  # Third column
+    # experiment_data.logarithmic_relaxation_time = np.log10(1 / (2 * np.pi * experiment_data.frequency))
 
     return experiment_data
 
 def normalize_impedance(experiment_data:ExperimentData):
-    kramers_kronig_transform = max(experiment_data.real_impedance)
-    experiment_data.real_impedance /= kramers_kronig_transform
-    experiment_data.imaginary_impedance /= kramers_kronig_transform
+    experiment_data.normalization_factor = max(experiment_data.real_impedance)
+    experiment_data.real_impedance /= experiment_data.normalization_factor
+    experiment_data.imaginary_impedance /= experiment_data.normalization_factor
 

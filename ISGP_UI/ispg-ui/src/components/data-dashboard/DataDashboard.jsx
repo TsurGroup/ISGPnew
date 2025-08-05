@@ -146,12 +146,14 @@ useEffect(() => {
   const handleSocketClose = () => {
     setIsPaused(true);
     setIsCompleted(true);
-    navigate('/CompletionScreen');
+    setTimeout(() => navigate('/CompletionScreen'), 50); // ⏱️ give it a tick
   };
 
   const handleSocketError = (err) => {
+    console.log("err is acurring")
+    console.log(err)
     setIsPaused(true);
-    alert('A connection error occurred. Please check your connection or try again later.');
+    //alert('A connection error occurred. Please check your connection or try again later.');
   };
 
   connectToEvolution(
@@ -161,10 +163,11 @@ useEffect(() => {
   );
 
   return () => {
+    console.log("Cleaning up socket")
     setIsPaused(true);
-    closeEvolutionSocket();
+    closeEvolutionSocket(); // 👈 this was killing it early
   };
-}, [navigate]);
+}, []); // 👈 only run once on mount
 
 
 

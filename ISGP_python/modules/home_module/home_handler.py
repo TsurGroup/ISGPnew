@@ -14,7 +14,7 @@ def create_new_project(project_name):
     delete_cache()
     #project_path = get_project_path(project_name)
     db_path = get_db_path()
-
+    print(db_path)
     if check_if_path_exists(db_path):
         return False
     

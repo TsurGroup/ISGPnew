@@ -77,7 +77,7 @@ async def setFilter(data: FilterDataView, project_name: str = Depends(get_curren
 
 @router.get("/getExampleTextFile")
 async def getExampleTextFile(project_name: str = Depends(get_current_project_name)):
-    github_url = 'https://raw.githubusercontent.com/shem221/ISGPexampleFiles/refs/heads/main/RCData.txt'
+    github_url = 'https://raw.githubusercontent.com/TsurGroup/ISGPexampleFiles/refs/heads/main/RCData.txt'
     filename = 'RCData.txt'
     try:
         # Download file from GitHub
@@ -89,7 +89,7 @@ async def getExampleTextFile(project_name: str = Depends(get_current_project_nam
 
 @router.get("/getExampleExcelFile")
 async def getExampleTextFile(project_name: str = Depends(get_current_project_name)):
-    github_url = 'https://raw.githubusercontent.com/shem221/ISGPexampleFiles/refs/heads/main/RCData.xlsx'
+    github_url = 'https://raw.githubusercontent.com/TsurGroup/ISGPexampleFiles/refs/heads/main/RCData.xlsx'
     filename = 'RCData.xlsx'
     try:
         # Download file from GitHub
